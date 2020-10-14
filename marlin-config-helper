@@ -5,6 +5,7 @@ MARLIN_CACHE=$PWD/cache
 MARLIN="Marlin"
 
 MARLIN_LOCKFILE=.marlin.lock
+MARLIN_CURRENT_LOCKFILE=.marlin.current.lock
 
 if [ -e $1 ]; then
     echo "Sourcing desired Marlin version from $MARLIN_LOCKFILE"
@@ -13,6 +14,8 @@ else
     echo "Sourcing desired Marlin version from argument"
     MARLIN_VERSION=$1
 fi 
+
+echo "Desired Marlin version is $MARLIN_VERSION"
 
 MARLIN_DOWNLOAD_URL="https://codeload.github.com/MarlinFirmware/Marlin/tar.gz/$MARLIN_VERSION"
 
@@ -26,9 +29,16 @@ if [ ! -e $MARLIN_CACHE/$MARLIN_VERSION.tar.gz ]; then
     curl $MARLIN_DOWNLOAD_URL -o $MARLIN_CACHE/$MARLIN_VERSION.tar.gz 
 fi
 
+if [ ! -e $MARLIN_CURRENT_LOCKFILE ]; then
+    echo "Current Marlin version in directory is not specified."
+    echo 0 > $MARLIN_CURRENT_LOCKFILE
+else
+	echo "Current Marlin version in directory is $(cat $MARLIN_CURRENT_LOCKFILE)"
+fi
+
 # Check the lock file to see what version of Marlin is currently
 # configured.
-if [ ! -e $MARLIN ] || ! grep -q "$MARLIN_VERSION" "$MARLIN_LOCKFILE"; then
+if [ ! -e $MARLIN ] || ! grep -q "$MARLIN_VERSION" "$MARLIN_CURRENT_LOCKFILE" || ! grep -q "$MARLIN_VERSION" "$MARLIN_LOCKFILE"; then
     echo "Initializing Marlin directory to $MARLIN_VERSION..."
 
     rm -rf Marlin
@@ -39,6 +49,7 @@ if [ ! -e $MARLIN ] || ! grep -q "$MARLIN_VERSION" "$MARLIN_LOCKFILE"; then
     # files stored outside of the Marlin tree
     cp -f --symbolic-link $PWD/configs/* $PWD/Marlin/Marlin
     echo $MARLIN_VERSION > $MARLIN_LOCKFILE
+    echo $MARLIN_VERSION > $MARLIN_CURRENT_LOCKFILE
 fi
 
 echo "Done!"
