@@ -7,13 +7,15 @@ MARLIN="Marlin"
 MARLIN_LOCKFILE=.marlin.lock
 MARLIN_CURRENT_LOCKFILE=.marlin.current.lock
 
-if [ -e $1 ]; then
-    echo "Sourcing desired Marlin version from $MARLIN_LOCKFILE"
-    MARLIN_VERSION=$(cat .marlin.lock)
-else
-    echo "Sourcing desired Marlin version from argument"
-    MARLIN_VERSION=$1
-fi 
+if [ -z $MARLIN_VERSION ]; then
+  if [ -e $1 ]; then
+      echo "Sourcing desired Marlin version from $MARLIN_LOCKFILE"
+      MARLIN_VERSION=$(cat .marlin.lock)
+  else
+      echo "Sourcing desired Marlin version from argument"
+      MARLIN_VERSION=$1
+  fi 
+fi
 
 echo "Desired Marlin version is $MARLIN_VERSION"
 
